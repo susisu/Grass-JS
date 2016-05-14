@@ -1,0 +1,22 @@
+{
+  "name": "@susisu/grass-js",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "bin": "bin"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/susisu/Grass-JS.git"
+  },
+  "author": "Susisu <susisu2413@yahoo.co.jp> (https://github.com/susisu)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/susisu/Grass-JS/issues"
+  },
+  "homepage": "https://github.com/susisu/Grass-JS#readme"
+}
