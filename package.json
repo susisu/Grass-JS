@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/susisu/Grass-JS/issues"
   },
-  "homepage": "https://github.com/susisu/Grass-JS#readme"
+  "homepage": "https://github.com/susisu/Grass-JS#readme",
+  "dependencies": {
+    "co": "^4.6.0"
+  }
 }
