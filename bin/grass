@@ -48,10 +48,7 @@ let main = co(function * () {
         );
     yield vm.run(DEBUG).then(_ => process.exit(0));
 }).catch(error => {
-    if (error instanceof grass.vm.RuntimeError) {
-        process.stderr.write("\n\n" + error.toString() + "\n");
-    }
-    else if (error instanceof lq.ParseError) {
+    if (error instanceof grass.vm.RuntimeError || error instanceof lq.ParseError) {
         process.stderr.write(error.toString() + "\n");
     }
     else {
