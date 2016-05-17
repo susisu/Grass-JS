@@ -23,10 +23,12 @@ process.stdin.setEncoding("utf8");
 program.usage("[options] <progfile>");
 program.version(packageInfo.version, "-v, --version");
 program.option("-e, --eval <program>", "evaluate program");
+program.option("-d, --debug", "debug mode (enable error tracing)")
 program.parse(process.argv);
 
 let main = co(function * () {
-    const EVAL = program["eval"];
+    const EVAL  = program["eval"];
+    const DEBUG = program["debug"];
     if (EVAL === undefined && program.args.length === 0) {
         program.help();
     }
@@ -44,7 +46,7 @@ let main = co(function * () {
             stdinStream(),
             c => process.stdout.write(String.fromCharCode(c))
         );
-    yield vm.run().then(_ => process.exit(0));
+    yield vm.run(DEBUG).then(_ => process.exit(0));
 }).catch(error => {
     if (error instanceof grass.vm.RuntimeError) {
         process.stderr.write("\n\n" + error.toString() + "\n");
