@@ -1,0 +1,117 @@
+#!/usr/bin/env node
+
+/*
+ * Grass-JS / grass
+ * copyright (c) 2016 Susisu
+ */
+
+"use strict";
+
+const fs = require("fs");
+
+const co = require("co");
+const lq = require("loquat");
+
+let program = require("commander");
+
+let grass = require("../lib/grass.js");
+let packageInfo = require("../package.json");
+
+process.title = "grass";
+process.stdin.setEncoding("utf8");
+
+program.usage("[options] <progfile>");
+program.version(packageInfo.version, "-v, --version");
+program.option("-e, --eval <program>", "evaluate program");
+program.parse(process.argv);
+
+let main = co(function * () {
+    const EVAL = program["eval"];
+    if (EVAL === undefined && program.args.length === 0) {
+        program.help();
+    }
+    const PROGFILE = EVAL === undefined && program.args.length > 0
+        ? program.args[0]
+        : "";
+    let src = EVAL !== undefined
+        ? EVAL
+        : yield readFile(PROGFILE, { encoding: "utf8" });
+    // parse
+    let code = grass.parser.parse(PROGFILE, src);
+    // run
+    let vm = new grass.vm.VM(
+            code,
+            stdinStream(),
+            c => process.stdout.write(String.fromCharCode(c))
+        );
+    yield vm.run().then(_ => process.exit(0));
+}).catch(error => {
+    if (error instanceof grass.vm.RuntimeError) {
+        process.stderr.write("\n\n" + error.toString() + "\n");
+    }
+    else if (error instanceof lq.ParseError) {
+        process.stderr.write(error.toString() + "\n");
+    }
+    else {
+        console.error(error);
+    }
+    process.exit(1);
+});
+
+function readFile(filename, options) {
+    return new Promise((resolve, reject) => {
+        fs.readFile(filename, options, (error, data) => {
+            if (error) {
+                reject(error);
+            }
+            else {
+                resolve(data);
+            }
+        })
+    });
+}
+
+function stdinStream() {
+    let buffer  = "";
+    let end     = false;
+    let pending = null;
+
+    process.stdin.on("readable", () => {
+        let chunk = process.stdin.read();
+        if (chunk !== null) {
+            buffer += chunk;
+            if (pending) {
+                let c = buffer[0];
+                buffer = buffer.substr(1);
+                pending.resolve(c.charCodeAt(0));
+                pending = null;
+            }
+        }
+    });
+
+    process.stdin.on("end", () => {
+        end = true;
+        if (pending) {
+            pending.reject();
+            pending = null;
+        }
+    });
+
+    function input() {
+        if (buffer.length > 0) {
+            let c = buffer[0];
+            buffer = buffer.substr(1);
+            return c.charCodeAt(0);
+        }
+        else if (end) {
+            return undefined;
+        }
+        else {
+            return new Promise((resolve, reject) => {
+                pending = { resolve, reject };
+            });
+        }
+    }
+
+    return input;
+}
