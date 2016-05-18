@@ -1,6 +1,6 @@
 {
   "name": "@susisu/grass-js",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Grass interpreter",
   "main": "index.js",
   "directories": {
