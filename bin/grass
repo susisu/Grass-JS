@@ -10,12 +10,11 @@
 const fs = require("fs");
 
 const co = require("co");
-const lq = require("loquat");
 
-let program = require("commander");
+const program = require("commander");
 
-let grass = require("../lib/grass.js");
-let packageInfo = require("../package.json");
+const grass = require("../lib/grass.js");
+const packageInfo = require("../package.json");
 
 process.title = "grass";
 process.stdin.setEncoding("utf8");
@@ -23,10 +22,10 @@ process.stdin.setEncoding("utf8");
 program.usage("[options] <progfile>");
 program.version(packageInfo.version, "-v, --version");
 program.option("-e, --eval <program>", "evaluate program");
-program.option("-d, --debug", "debug mode (enable error tracing)")
+program.option("-d, --debug", "debug mode (enable error tracing)");
 program.parse(process.argv);
 
-let main = co(function * () {
+co(function* () {
     const EVAL  = program["eval"];
     const DEBUG = program["debug"];
     if (EVAL === undefined && program.args.length === 0) {
@@ -35,23 +34,24 @@ let main = co(function * () {
     const PROGFILE = EVAL === undefined && program.args.length > 0
         ? program.args[0]
         : "";
-    let src = EVAL !== undefined
+    const src = EVAL !== undefined
         ? EVAL
         : yield readFile(PROGFILE, { encoding: "utf8" });
     // parse
-    let code = grass.parser.parse(PROGFILE, src);
+    const code = grass.parser.parse(PROGFILE, src);
     // run
-    let vm = new grass.vm.VM(
+    const vm = new grass.vm.VM(
             code,
             stdinStream(),
             c => process.stdout.write(String.fromCharCode(c))
         );
-    yield vm.run(DEBUG).then(_ => process.exit(0));
+    yield vm.run(DEBUG).then(() => process.exit(0));
 }).catch(error => {
-    if (error instanceof grass.vm.RuntimeError || error instanceof lq.ParseError) {
+    if (error instanceof grass.vm.RuntimeError || error instanceof grass.parser.ParseError) {
         process.stderr.write(error.toString() + "\n");
     }
     else {
+        // eslint-disable-next-line no-console
         console.error(error);
     }
     process.exit(1);
@@ -66,7 +66,7 @@ function readFile(filename, options) {
             else {
                 resolve(data);
             }
-        })
+        });
     });
 }
 
@@ -76,11 +76,11 @@ function stdinStream() {
     let pending = null;
 
     process.stdin.on("readable", () => {
-        let chunk = process.stdin.read();
+        const chunk = process.stdin.read();
         if (chunk !== null) {
             buffer += chunk;
             if (pending) {
-                let c = buffer[0];
+                const c = buffer[0];
                 buffer = buffer.substr(1);
                 pending.resolve(c.charCodeAt(0));
                 pending = null;
@@ -98,7 +98,7 @@ function stdinStream() {
 
     function input() {
         if (buffer.length > 0) {
-            let c = buffer[0];
+            const c = buffer[0];
             buffer = buffer.substr(1);
             return c.charCodeAt(0);
         }
