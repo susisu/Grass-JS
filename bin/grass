@@ -10,7 +10,6 @@
 const fs = require("fs");
 
 const co = require("co");
-const lq = require("loquat");
 
 let program = require("commander");
 
@@ -48,7 +47,7 @@ let main = co(function * () {
         );
     yield vm.run(DEBUG).then(_ => process.exit(0));
 }).catch(error => {
-    if (error instanceof grass.vm.RuntimeError || error instanceof lq.ParseError) {
+    if (error instanceof grass.vm.RuntimeError || error instanceof grass.parser.ParseError) {
         process.stderr.write(error.toString() + "\n");
     }
     else {

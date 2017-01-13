@@ -22,6 +22,6 @@
   "dependencies": {
     "co": "^4.6.0",
     "commander": "^2.9.0",
-    "loquat": "^1.3.2"
+    "loquat": "^2.0.0"
   }
 }
